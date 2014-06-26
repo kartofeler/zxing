@@ -27,13 +27,13 @@ import com.google.zxing.client.result.ResultParser;
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class ResultHandlerFactory {
-  private ResultHandlerFactory() {
-  }
+    private ResultHandlerFactory() {
+    }
 
-  public static ResultHandler makeResultHandler(CaptureActivity activity, Result rawResult) {
-    ParsedResult result = parseResult(rawResult);
-    switch (result.getType()) {
-      case ADDRESSBOOK:
+    public static ResultHandler makeResultHandler(CaptureActivity activity, Result rawResult) {
+        ParsedResult result = parseResult(rawResult);
+        switch (result.getType()) {
+      /*case ADDRESSBOOK:
         return new AddressBookResultHandler(activity, result);
       case EMAIL_ADDRESS:
         return new EmailAddressResultHandler(activity, result);
@@ -52,13 +52,13 @@ public final class ResultHandlerFactory {
       case CALENDAR:
         return new CalendarResultHandler(activity, result);
       case ISBN:
-        return new ISBNResultHandler(activity, result, rawResult);
-      default:
-        return new TextResultHandler(activity, result, rawResult);
+        return new ISBNResultHandler(activity, result, rawResult);*/
+            default:
+                return new TextResultHandler(activity, result, rawResult);
+        }
     }
-  }
 
-  private static ParsedResult parseResult(Result rawResult) {
-    return ResultParser.parseResult(rawResult);
-  }
+    private static ParsedResult parseResult(Result rawResult) {
+        return ResultParser.parseResult(rawResult);
+    }
 }

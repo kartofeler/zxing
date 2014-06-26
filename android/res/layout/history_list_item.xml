@@ -15,20 +15,22 @@
  limitations under the License.
  -->
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/standard_padding">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/standard_padding">
 
-  <TextView android:id="@+id/history_title"
+    <TextView
+            android:id="@+id/history_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:singleLine="true"
             android:textIsSelectable="false"/>
 
-  <TextView android:id="@+id/history_detail"
+    <TextView
+            android:id="@+id/history_detail"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
