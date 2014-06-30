@@ -61,6 +61,14 @@ public final class CameraManager {
      */
     private final PreviewCallback previewCallback;
 
+    private int customContainerRectX = 0;
+    private int customContainerRectY = 0;
+
+    public void setCustomContainerRect(int x, int y) {
+        customContainerRectX = x;
+        customContainerRectY = y;
+    }
+
     public CameraManager(Context context) {
         this.context = context;
         this.configManager = new CameraConfigurationManager(context);
@@ -88,16 +96,25 @@ public final class CameraManager {
             }
             camera = theCamera;
         }
+
+        theCamera.setDisplayOrientation(CameraOrientation.rotation);
         theCamera.setPreviewDisplay(holder);
 
         if (!initialized) {
+            Log.i("xxx", "Camera initializing");
             initialized = true;
-            configManager.initFromCameraParameters(theCamera);
+            if (customContainerRectX != 0 && customContainerRectY != 0) {
+                configManager.initFromCameraParameters(theCamera, customContainerRectX, customContainerRectY);
+            } else {
+                configManager.initFromCameraParameters(theCamera);
+            }
             if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
                 setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
                 requestedFramingRectWidth = 0;
                 requestedFramingRectHeight = 0;
             }
+        } else {
+            Log.i("xxx", "Camera already initialized");
         }
 
         Camera.Parameters parameters = theCamera.getParameters();
@@ -216,7 +233,12 @@ public final class CameraManager {
             if (camera == null) {
                 return null;
             }
-            Point screenResolution = configManager.getScreenResolution();
+            Point screenResolution;
+            if (customContainerRectX != 0 && customContainerRectY != 0) {
+                screenResolution = new Point(customContainerRectX, customContainerRectY);
+            } else {
+                screenResolution = configManager.getScreenResolution();
+            }
             if (screenResolution == null) {
                 // Called early, before init even finished
                 return null;
@@ -258,7 +280,12 @@ public final class CameraManager {
             }
             Rect rect = new Rect(framingRect);
             Point cameraResolution = configManager.getCameraResolution();
-            Point screenResolution = configManager.getScreenResolution();
+            Point screenResolution;
+            if (customContainerRectX != 0 && customContainerRectY != 0) {
+                screenResolution = new Point(customContainerRectX, customContainerRectY);
+            } else {
+                screenResolution = configManager.getScreenResolution();
+            }
             if (cameraResolution == null || screenResolution == null) {
                 // Called early, before init even finished
                 return null;
@@ -296,7 +323,12 @@ public final class CameraManager {
      */
     public synchronized void setManualFramingRect(int width, int height) {
         if (initialized) {
-            Point screenResolution = configManager.getScreenResolution();
+            Point screenResolution;
+            if (customContainerRectX != 0 && customContainerRectY != 0) {
+                screenResolution = new Point(customContainerRectX, customContainerRectY);
+            } else {
+                screenResolution = configManager.getScreenResolution();
+            }
             if (width > screenResolution.x) {
                 width = screenResolution.x;
             }
@@ -331,6 +363,10 @@ public final class CameraManager {
         // Go ahead and assume it's YUV rather than die.
         return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
                 rect.width(), rect.height(), false);
+    }
+
+    public Camera getCamera() {
+        return camera;
     }
 
 }

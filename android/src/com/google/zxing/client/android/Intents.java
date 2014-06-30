@@ -31,7 +31,7 @@ public final class Intents {
          * Send this intent to open the Barcodes app in scanning mode, find a barcode, and return
          * the results.
          */
-        public static final String ACTION = "com.google.zxing.client.android.SCAN";
+        public static final String ACTION = "pro.jazzy.qrreader.action.SCAN";
 
         /**
          * By default, sending this will decode all barcodes that we understand. However it
@@ -166,44 +166,6 @@ public final class Intents {
         public static final String RESULT_BYTE_SEGMENTS_PREFIX = "SCAN_RESULT_BYTE_SEGMENTS_";
 
         private Scan() {
-        }
-    }
-
-    public static final class Encode {
-        /**
-         * Send this intent to encode a piece of data as a QR code and display it full screen, so
-         * that another person can scan the barcode from your screen.
-         */
-        public static final String ACTION = "com.google.zxing.client.android.ENCODE";
-
-        /**
-         * The data to encode. Use {@link android.content.Intent#putExtra(String, String)} or
-         * {@link android.content.Intent#putExtra(String, android.os.Bundle)},
-         * depending on the type and format specified. Non-QR Code formats should
-         * just use a String here. For QR Code, see Contents for details.
-         */
-        public static final String DATA = "ENCODE_DATA";
-
-        /**
-         * The type of data being supplied if the format is QR Code. Use
-         * {@link android.content.Intent#putExtra(String, String)} with one of {@link Contents.Type}.
-         */
-        public static final String TYPE = "ENCODE_TYPE";
-
-        /**
-         * The barcode format to be displayed. If this isn't specified or is blank,
-         * it defaults to QR Code. Use {@link android.content.Intent#putExtra(String, String)}, where
-         * format is one of {@link com.google.zxing.BarcodeFormat}.
-         */
-        public static final String FORMAT = "ENCODE_FORMAT";
-
-        /**
-         * Normally the contents of the barcode are displayed to the user in a TextView. Setting this
-         * boolean to false will hide that TextView, showing only the encode barcode.
-         */
-        public static final String SHOW_CONTENTS = "ENCODE_SHOW_CONTENTS";
-
-        private Encode() {
         }
     }
 }

@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import com.google.zxing.*;
+import com.google.zxing.client.android.camera.CameraOrientation;
 import com.google.zxing.common.HybridBinarizer;
 
 import java.io.ByteArrayOutputStream;
@@ -47,14 +48,13 @@ final class DecodeHandler extends Handler {
         if (!running) {
             return;
         }
-        switch (message.what) {
-            case R.id.decode:
-                decode((byte[]) message.obj, message.arg1, message.arg2);
-                break;
-            case R.id.quit:
-                running = false;
-                Looper.myLooper().quit();
-                break;
+        if (message.what == R.id.decode) {
+            decode((byte[]) message.obj, message.arg1, message.arg2);
+
+        } else if (message.what == R.id.quit) {
+            running = false;
+            Looper.myLooper().quit();
+
         }
     }
 
@@ -68,6 +68,9 @@ final class DecodeHandler extends Handler {
      */
     private void decode(byte[] data, int width, int height) {
         long start = System.currentTimeMillis();
+        data = (CameraOrientation.orientation == CameraOrientation.VERTICAL) ?
+                rotateYUV420Degree90(data, width, height) :
+                data;
         Result rawResult = null;
         PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(data, width, height);
         if (source != null) {
@@ -110,6 +113,29 @@ final class DecodeHandler extends Handler {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
         bundle.putByteArray(DecodeThread.BARCODE_BITMAP, out.toByteArray());
         bundle.putFloat(DecodeThread.BARCODE_SCALED_FACTOR, (float) width / source.getWidth());
+    }
+
+    private byte[] rotateYUV420Degree90(byte[] data, int imageWidth, int imageHeight) {
+        byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
+        // Rotate the Y luma
+        int i = 0;
+        for (int x = 0; x < imageWidth; x++) {
+            for (int y = imageHeight - 1; y >= 0; y--) {
+                yuv[i] = data[y * imageWidth + x];
+                i++;
+            }
+        }
+        // Rotate the U and V color components
+        i = imageWidth * imageHeight * 3 / 2 - 1;
+        for (int x = imageWidth - 1; x > 0; x = x - 2) {
+            for (int y = 0; y < imageHeight / 2; y++) {
+                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth) + x];
+                i--;
+                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth) + (x - 1)];
+                i--;
+            }
+        }
+        return yuv;
     }
 
 }

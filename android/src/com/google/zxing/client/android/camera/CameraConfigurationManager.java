@@ -24,7 +24,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import com.google.zxing.client.android.PreferencesActivity;
+import com.google.zxing.client.android.JzConfiguration;
 
 /**
  * A class which deals with reading, parsing, and setting the camera parameters which are used to
@@ -57,6 +57,14 @@ final class CameraConfigurationManager {
         Log.i(TAG, "Camera resolution: " + cameraResolution);
     }
 
+    void initFromCameraParameters(Camera camera, int x, int y) {
+        Camera.Parameters parameters = camera.getParameters();
+        screenResolution = new Point(x, y);
+        Log.i(TAG, "Screen resolution: " + screenResolution);
+        cameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
+        Log.i(TAG, "Camera resolution: " + cameraResolution);
+    }
+
     void setDesiredCameraParameters(Camera camera, boolean safeMode) {
         Camera.Parameters parameters = camera.getParameters();
 
@@ -77,20 +85,20 @@ final class CameraConfigurationManager {
 
         CameraConfigurationUtils.setFocus(
                 parameters,
-                prefs.getBoolean(PreferencesActivity.KEY_AUTO_FOCUS, true),
-                prefs.getBoolean(PreferencesActivity.KEY_DISABLE_CONTINUOUS_FOCUS, true),
+                JzConfiguration.USE_AUTOFOCUS,
+                JzConfiguration.DISABLE_CONTINUOUS_FOCUS,
                 safeMode);
 
         if (!safeMode) {
-            if (prefs.getBoolean(PreferencesActivity.KEY_INVERT_SCAN, false)) {
+            if (JzConfiguration.INVERT_SCAN) {
                 CameraConfigurationUtils.setInvertColor(parameters);
             }
 
-            if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_BARCODE_SCENE_MODE, true)) {
+            if (!JzConfiguration.DISABLE_BARCODE_SCENE_MODE) {
                 CameraConfigurationUtils.setBarcodeSceneMode(parameters);
             }
 
-            if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_METERING, true)) {
+            if (!JzConfiguration.DISABLE_METERING) {
                 CameraConfigurationUtils.setVideoStabilization(parameters);
                 CameraConfigurationUtils.setFocusArea(parameters);
                 CameraConfigurationUtils.setMetering(parameters);
@@ -98,6 +106,7 @@ final class CameraConfigurationManager {
 
         }
 
+        Log.i("xxx", "previewSize x=" + cameraResolution.x + " y=" + cameraResolution.y);
         parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
         camera.setParameters(parameters);
 
@@ -139,14 +148,14 @@ final class CameraConfigurationManager {
     }
 
     private void initializeTorch(Camera.Parameters parameters, SharedPreferences prefs, boolean safeMode) {
-        boolean currentSetting = FrontLightMode.readPref(prefs) == FrontLightMode.ON;
+        boolean currentSetting = FrontLightMode.parse(JzConfiguration.LIGHT_MODE) == FrontLightMode.ON;
         doSetTorch(parameters, currentSetting, safeMode);
     }
 
     private void doSetTorch(Camera.Parameters parameters, boolean newSetting, boolean safeMode) {
         CameraConfigurationUtils.setTorch(parameters, newSetting);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!safeMode && !prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, true)) {
+        if (!safeMode && !JzConfiguration.DISABLE_EXPOSURE) {
             CameraConfigurationUtils.setBestExposure(parameters, newSetting);
         }
     }

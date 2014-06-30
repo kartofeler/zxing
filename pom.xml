@@ -25,34 +25,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-jdk14</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>17.0</version>
-      </dependency>
-      <dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-web-api</artifactId>
-        <version>6.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
         <groupId>com.google.android</groupId>
         <artifactId>android</artifactId>
         <version>4.1.1.4</version>
@@ -61,21 +33,6 @@
       <dependency>
         <groupId>com.google.zxing</groupId>
         <artifactId>core</artifactId>
-        <version>${zxing.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.zxing</groupId>
-        <artifactId>android-core</artifactId>
-        <version>${zxing.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.zxing</groupId>
-        <artifactId>android-integration</artifactId>
-        <version>${zxing.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.zxing</groupId>
-        <artifactId>javase</artifactId>
         <version>${zxing.version}</version>
       </dependency>
       <dependency>
@@ -89,11 +46,6 @@
 
   <modules>
     <module>core</module>
-    <module>javase</module>
-    <module>android-core</module>
-    <module>android-integration</module>
-    <module>zxing.appspot.com</module>
-    <module>zxingorg</module>
   </modules>
 
   <properties>
