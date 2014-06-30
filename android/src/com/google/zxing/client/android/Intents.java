@@ -23,6 +23,7 @@ package com.google.zxing.client.android;
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class Intents {
+
     private Intents() {
     }
 
