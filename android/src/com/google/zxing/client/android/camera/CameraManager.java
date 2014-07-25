@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.client.android.JzConfiguration;
 import com.google.zxing.client.android.camera.open.OpenCameraInterface;
 
 import java.io.IOException;
@@ -100,27 +101,27 @@ public final class CameraManager {
         theCamera.setDisplayOrientation(CameraOrientation.rotation);
         theCamera.setPreviewDisplay(holder);
 
+        Log.i("xxx", "customContainerRectX=" + customContainerRectX + " customContainerRectY=" + customContainerRectY);
+
         if (!initialized) {
-            Log.i("xxx", "Camera initializing");
             initialized = true;
             if (customContainerRectX != 0 && customContainerRectY != 0) {
                 configManager.initFromCameraParameters(theCamera, customContainerRectX, customContainerRectY);
             } else {
                 configManager.initFromCameraParameters(theCamera);
             }
+            Log.i("xxx", "requestedFramingRectWidth=" + requestedFramingRectWidth + " requestedFramingRectHeight=" + requestedFramingRectHeight);
             if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
                 setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
                 requestedFramingRectWidth = 0;
                 requestedFramingRectHeight = 0;
             }
-        } else {
-            Log.i("xxx", "Camera already initialized");
         }
 
         Camera.Parameters parameters = theCamera.getParameters();
         String parametersFlattened = parameters == null ? null : parameters.flatten(); // Save these, temporarily
         try {
-            configManager.setDesiredCameraParameters(theCamera, false);
+            configManager.setDesiredCameraParameters(theCamera, JzConfiguration.SAFE_MODE);
         } catch (RuntimeException re) {
             // Driver failed
             Log.w(TAG, "Camera rejected parameters. Setting only minimal safe-mode parameters");
@@ -138,7 +139,6 @@ public final class CameraManager {
                 }
             }
         }
-
     }
 
     public synchronized boolean isOpen() {

@@ -85,8 +85,10 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (JzConfiguration.KEEP_SCREEN_ON) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         setContentView(R.layout.capture);
 
         hasSurface = false;
@@ -95,8 +97,8 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
         ambientLightManager = new AmbientLightManager(this);
     }
 
-    private int customContainerRectX = 0;
-    private int customContainerRectY = 0;
+    private int customContainerRectWidth = 0;
+    private int customContainerRectHeight = 0;
 
     /**
      * Set custom camera preview container dimensions.
@@ -107,8 +109,8 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
      */
     public void setCustomContainerRect(int x, int y) {
         Log.i("xxx", "setCustomContainerRect() called");
-        customContainerRectX = x;
-        customContainerRectY = y;
+        customContainerRectWidth = x;
+        customContainerRectHeight = y;
     }
 
     @Override
@@ -254,11 +256,15 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
                 return true;
             // Use volume up/down to turn on light
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                cameraManager.setTorch(false);
-                return true;
+                if (JzConfiguration.TORCH_SWITCH) {
+                    cameraManager.setTorch(false);
+                    return true;
+                }
             case KeyEvent.KEYCODE_VOLUME_UP:
-                cameraManager.setTorch(true);
-                return true;
+                if (JzConfiguration.TORCH_SWITCH) {
+                    cameraManager.setTorch(true);
+                    return true;
+                }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -304,8 +310,8 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
      * A valid barcode has been found, so give an indication of success and show the results.
      *
      * @param rawResult   The contents of the barcode.
-     * @param scaleFactor amount by which thumbnail was scaled
      * @param barcode     A greyscale bitmap of the camera data which was decoded.
+     * @param scaleFactor Amount by which thumbnail was scaled
      */
     public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
         inactivityTimer.onActivity();
@@ -382,7 +388,7 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
     private void handleDecodeInternally(Result rawResult, ResultHandler resultHandler, Bitmap barcode) {
 
         String code = resultHandler.getResult().getDisplayResult();
-        onResultDiscovered(code, rawResult.getBarcodeFormat(), resultHandler.getType());
+        onResultDiscovered(code, barcode, rawResult.getBarcodeFormat(), resultHandler.getType());
 
         restartPreviewAfterDelay(1000);
     }
@@ -391,10 +397,11 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
      * Method called on barcode found.
      *
      * @param code          Content of a scanned code.
+     * @param image         Preview frame from camera with scanned barcode.
      * @param barcodeFormat Format of scanner code (EAN_8, QR...)
      * @param resultType    Type of data found (PRODUCT, ISBN, TEL...)
      */
-    protected void onResultDiscovered(String code, BarcodeFormat barcodeFormat, ParsedResultType resultType) {
+    protected void onResultDiscovered(String code, Bitmap image, BarcodeFormat barcodeFormat, ParsedResultType resultType) {
         // just empty body - is called on scanning success
     }
 
@@ -483,8 +490,9 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
             Log.w(TAG, "initCamera() while already open -- late SurfaceView callback?");
             return;
         }
-        if (customContainerRectX != 0 && customContainerRectY != 0) {
-            cameraManager.setCustomContainerRect(customContainerRectX, customContainerRectY);
+        if (customContainerRectWidth != 0 && customContainerRectHeight != 0) {
+            cameraManager.setCustomContainerRect(customContainerRectWidth, customContainerRectHeight);
+            cameraManager.setManualFramingRect(customContainerRectWidth, customContainerRectHeight / 3);
         }
         try {
             cameraManager.openDriver(surfaceHolder);

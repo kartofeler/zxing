@@ -69,7 +69,7 @@ final class DecodeHandler extends Handler {
     private void decode(byte[] data, int width, int height) {
         long start = System.currentTimeMillis();
         data = (CameraOrientation.orientation == CameraOrientation.VERTICAL) ?
-                rotateYUV420Degree90(data, width, height) :
+                rotateYUV420degree90(data, width, height) :
                 data;
         Result rawResult = null;
         PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(data, width, height);
@@ -115,7 +115,7 @@ final class DecodeHandler extends Handler {
         bundle.putFloat(DecodeThread.BARCODE_SCALED_FACTOR, (float) width / source.getWidth());
     }
 
-    private byte[] rotateYUV420Degree90(byte[] data, int imageWidth, int imageHeight) {
+    private byte[] rotateYUV420degree90(byte[] data, int imageWidth, int imageHeight) {
         byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
         // Rotate the Y luma
         int i = 0;
@@ -125,17 +125,8 @@ final class DecodeHandler extends Handler {
                 i++;
             }
         }
-        // Rotate the U and V color components
-        i = imageWidth * imageHeight * 3 / 2 - 1;
-        for (int x = imageWidth - 1; x > 0; x = x - 2) {
-            for (int y = 0; y < imageHeight / 2; y++) {
-                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth) + x];
-                i--;
-                yuv[i] = data[(imageWidth * imageHeight) + (y * imageWidth) + (x - 1)];
-                i--;
-            }
-        }
+        // We don't care about U and V color
+
         return yuv;
     }
-
 }
