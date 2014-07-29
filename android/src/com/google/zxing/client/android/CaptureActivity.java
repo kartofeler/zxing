@@ -19,9 +19,7 @@ package com.google.zxing.client.android;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.*;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,7 +46,7 @@ import java.util.Map;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public class CaptureActivity extends Activity implements SurfaceHolder.Callback {
+public class CaptureActivity extends Activity implements TextureView.SurfaceTextureListener {
 
     private static final String TAG = CaptureActivity.class.getSimpleName();
 
@@ -134,15 +132,15 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
         resetStatusView();
 
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
-        SurfaceHolder surfaceHolder = surfaceView.getHolder();
+        TextureView textureView = (TextureView) findViewById(R.id.preview_view);
+        SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);
+            initCamera(surfaceTexture);
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
-            surfaceHolder.addCallback(this);
+            textureView.setSurfaceTextureListener(this);
         }
 
         beepManager.updatePrefs();
@@ -227,9 +225,8 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
         beepManager.close();
         cameraManager.closeDriver();
         if (!hasSurface) {
-            SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
-            SurfaceHolder surfaceHolder = surfaceView.getHolder();
-            surfaceHolder.removeCallback(this);
+            TextureView textureView = (TextureView) findViewById(R.id.preview_view);
+            textureView.setSurfaceTextureListener(null);
         }
         super.onPause();
     }
@@ -283,27 +280,6 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
             }
             savedResultToShow = null;
         }
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        if (holder == null) {
-            Log.e(TAG, "*** WARNING *** surfaceCreated() gave us a null surface!");
-        }
-        if (!hasSurface) {
-            hasSurface = true;
-            initCamera(holder);
-        }
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        hasSurface = false;
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     /**
@@ -389,12 +365,11 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
         String code = resultHandler.getResult().getDisplayResult();
         onResultDiscovered(code, barcode, rawResult.getBarcodeFormat(), resultHandler.getType());
-
-        restartPreviewAfterDelay(1000);
     }
 
     /**
      * Method called on barcode found.
+     * If you need to scan more codes in row use method restartPreviewAfterDelay(int);
      *
      * @param code          Content of a scanned code.
      * @param image         Preview frame from camera with scanned barcode.
@@ -482,9 +457,9 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
         }
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
-        if (surfaceHolder == null) {
-            throw new IllegalStateException("No SurfaceHolder provided");
+    private void initCamera(SurfaceTexture surfaceTexture) {
+        if (surfaceTexture == null) {
+            throw new IllegalStateException("No SurfaceTexture provided");
         }
         if (cameraManager.isOpen()) {
             Log.w(TAG, "initCamera() while already open -- late SurfaceView callback?");
@@ -492,10 +467,10 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
         }
         if (customContainerRectWidth != 0 && customContainerRectHeight != 0) {
             cameraManager.setCustomContainerRect(customContainerRectWidth, customContainerRectHeight);
-            cameraManager.setManualFramingRect(customContainerRectWidth, customContainerRectHeight / 3);
+            //cameraManager.setManualFramingRect(customContainerRectWidth, customContainerRectHeight / 3);
         }
         try {
-            cameraManager.openDriver(surfaceHolder);
+            cameraManager.openDriver(surfaceTexture);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if (handler == null) {
                 handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
@@ -542,5 +517,41 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
     public void drawViewfinder() {
         viewfinderView.drawViewfinder();
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+        if (surfaceTexture == null) {
+            Log.e(TAG, "*** WARNING *** onSurfaceTextureAvailable() gave us a null surface!");
+        }
+        setCustomContainerRect(width, height);
+        if (!hasSurface) {
+            hasSurface = true;
+            initCamera(surfaceTexture);
+        }
+
+        float ratio = (cameraManager.getCamera().getParameters().getPreviewSize().width / (float) cameraManager.getCamera().getParameters().getPreviewSize().height) * (width / (float) height);
+        Log.i(TAG, "Preview size vs. Surface preview dimension: " + ratio);
+
+        Matrix matrix = new Matrix();
+        matrix.setScale(1.0f, ratio, width / 2, height / 2);
+
+        TextureView textureView = (TextureView) findViewById(R.id.preview_view);
+        textureView.setTransform(matrix);
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+
     }
 }

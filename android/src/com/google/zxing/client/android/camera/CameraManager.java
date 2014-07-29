@@ -19,10 +19,10 @@ package com.google.zxing.client.android.camera;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.client.android.JzConfiguration;
 import com.google.zxing.client.android.camera.open.OpenCameraInterface;
@@ -79,10 +79,10 @@ public final class CameraManager {
     /**
      * Opens the camera driver and initializes the hardware parameters.
      *
-     * @param holder The surface object which the camera will draw preview frames into.
+     * @param texture The surface object which the camera will draw preview frames into.
      * @throws IOException Indicates the camera driver failed to open.
      */
-    public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+    public synchronized void openDriver(SurfaceTexture texture) throws IOException {
         Camera theCamera = camera;
         if (theCamera == null) {
 
@@ -99,7 +99,7 @@ public final class CameraManager {
         }
 
         theCamera.setDisplayOrientation(CameraOrientation.rotation);
-        theCamera.setPreviewDisplay(holder);
+        theCamera.setPreviewTexture(texture);
 
         Log.i("xxx", "customContainerRectX=" + customContainerRectX + " customContainerRectY=" + customContainerRectY);
 

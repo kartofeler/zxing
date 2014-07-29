@@ -16,7 +16,7 @@
  -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SurfaceView
+    <TextureView
             android:id="@+id/preview_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"/>

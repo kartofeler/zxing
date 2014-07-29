@@ -1,32 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SurfaceView
+    <TextureView
             android:id="@+id/preview_view"
-            android:layout_width="720px"
-            android:layout_height="400px"/>
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
 
     <com.google.zxing.client.android.ViewfinderView
             android:id="@+id/viewfinder_view"
-            android:layout_width="720px"
-            android:layout_height="400px"/>
-
-    <ImageView
-            android:id="@+id/ivScanned"
-            android:layout_width="720px"
-            android:layout_height="400px"
-            android:background="@color/encode_view"
-            android:layout_gravity="center_horizontal|bottom"/>
-
-    <TextView
-            android:id="@+id/status_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_margin="6dp"
-            android:background="@color/transparent"
-            android:gravity="center"
-            android:text="@string/msg_default_status"
-            android:textColor="@color/status_text"/>
-
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
 </merge>

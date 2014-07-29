@@ -15,7 +15,7 @@ public class JzConfiguration {
 
     // compatibility settings
     public static final boolean SAFE_MODE = false;
-    public static final boolean DISABLE_CONTINUOUS_FOCUS = false;
+    public static final boolean DISABLE_CONTINUOUS_FOCUS = true;
     public static final boolean INVERT_SCAN = false;
     public static final boolean DISABLE_BARCODE_SCENE_MODE = false;
     public static final boolean DISABLE_METERING = false;
